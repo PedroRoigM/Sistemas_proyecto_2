@@ -25,7 +25,7 @@ void GrabarDatos(EXT_DATOS *memdatos, FILE *fich);
 
 int main()
 {
-	char *comando[LONGITUD_COMANDO];
+	char comando[LONGITUD_COMANDO];
 	char *orden[LONGITUD_COMANDO];
 	char *argumento1[LONGITUD_COMANDO];
 	char *argumento2[LONGITUD_COMANDO];
@@ -58,10 +58,11 @@ int main()
      // Buce de tratamiento de comandos
     for (;;){
 		do {
-		printf (">> ");
-		fflush(stdin);
-		fgets(*comando, LONGITUD_COMANDO, stdin);
-		} while (ComprobarComando(*comando,*orden,*argumento1,*argumento2) !=0);
+			printf (">> ");
+			fflush(stdin);
+			fgets(comando, LONGITUD_COMANDO, stdin);
+			
+		} while (ComprobarComando(comando,*orden,*argumento1,*argumento2) !=0);
 		if (strcmp(*orden,"dir")==0) {
             Directorio(directorio,&ext_blq_inodos);
             continue;
@@ -97,7 +98,7 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 	
 }
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
-	
+	printf("Hola");
 }
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo){
 	

@@ -63,10 +63,13 @@ int main()
 			fgets(comando, LONGITUD_COMANDO, stdin);
 			
 		} while (ComprobarComando(comando,*orden,*argumento1,*argumento2) !=0);
+		
 		if (strcmp(*orden,"dir")==0) {
+			printf("Hola");
             Directorio(directorio,&ext_blq_inodos);
             continue;
         }
+		printf("AAAA");
          //...
          // Escritura de metadatos en comandos rename, remove, copy     
         Grabarinodosydirectorio(directorio,&ext_blq_inodos,fent);
@@ -89,7 +92,7 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps){
 	
 }
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2){
-	
+	return 0;
 }
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup){
 	

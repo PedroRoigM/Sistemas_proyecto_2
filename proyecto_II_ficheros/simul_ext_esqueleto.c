@@ -64,8 +64,8 @@ int main()
             fgets(comando, LONGITUD_COMANDO, stdin);
             // memcpy(orden, comando, LONGITUD_COMANDO);
 
-        } while (ComprobarComando(comando, orden, *argumento1, *argumento2) != 0);
-
+        } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
+        printf("Salido del bucle");
         if (strcmp(orden, "dir") == 1)
         {
 
@@ -74,26 +74,40 @@ int main()
         }
         else if (strcmp(orden, "info") == 1)
         {
-            continue;
+            LeeSuperBloque(&ext_superblock);
+            //continue;
         }
         else if (strcmp(orden, "bytemaps") == 1)
         {
+            Printbytemaps(&ext_bytemaps);
             continue;
         }
         else if (strcmp(orden, "imprimir") == 1)
         {
+            if (!Imprimir(directorio, &ext_blq_inodos, memdatos, argumento1)) {
+                    printf("Error al imprimir el fichero\n");
+                }
             continue;
         }
         else if (strcmp(orden, "rename") == 1)
         {
+            if (!Renombrar(directorio, &ext_blq_inodos, argumento1, argumento2)) {
+                    printf("Error al renombrar el fichero\n");
+                }
             continue;
         }
         else if (strcmp(orden, "remove") == 1)
         {
+            if (!Borrar(directorio, &ext_blq_inodos, &ext_bytemaps, &ext_superblock, argumento1, fent)) {
+                    printf("Error al eliminar el fichero\n");
+                }
             continue;
         }
         else if (strcmp(orden, "copy") == 1)
         {
+            if (!Copiar(directorio, &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2, fent)) {
+                    printf("Error al copiar el fichero\n");
+                }
             continue;
         }
         
@@ -123,17 +137,33 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps)
 }
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
 {
-    printf("%s", strcomando);
+    const char *comandosPosibles[] = {"info\0", "bytemaps\0", "dir\0", "rename\0","imprimir\0", "remove\0", "copy\0"};
     char letra;
     int i = 0;
+    int valorRetorno = 0;
     while(((letra = strcomando[i++]) != ' ') && (letra != '\0')){
-        argumento1[i-1] = letra;
+        orden[i-1] = letra;
     }
-    printf("%s", argumento1);
-    return 0;
+    orden[i] = '\0';
+    i = 0;
+    for(int j = 0; j < 7 && valorRetorno == 0; j++){
+        while(*comandosPosibles[i] == orden[i]);
+        if(orden[i] == '\0'){
+            valorRetorno = 1;
+        }
+    }
+    return valorRetorno;
 }
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup)
 {
+    printf("Información del Superbloque:\n");
+    printf("Total de inodos: %u\n", psup->s_inodes_count);
+    printf("Total de bloques: %u\n", psup->s_blocks_count);
+    printf("Bloques libres: %u\n", psup->s_free_blocks_count);
+    printf("Inodos libres: %u\n", psup->s_free_inodes_count);
+    printf("Primer bloque de datos: %u\n", psup->s_first_data_block);
+    printf("Tamaño del bloque: %u bytes\n", psup->s_block_size);
+
 }
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 {

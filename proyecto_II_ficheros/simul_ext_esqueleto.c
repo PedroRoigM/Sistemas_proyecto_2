@@ -62,48 +62,48 @@ int main()
             printf(">> ");
             fflush(stdin);
             fgets(comando, LONGITUD_COMANDO, stdin);
-            // memcpy(orden, comando, LONGITUD_COMANDO);
+			
 
         } while (ComprobarComando(comando, orden, argumento1, argumento2) != 0);
-        printf("Salido del bucle");
-        if (strcmp(orden, "dir") == 1)
+		
+		
+        if (strcmp(orden, "dir") == 0)
         {
-
             Directorio(directorio, &ext_blq_inodos);
             continue;
         }
-        else if (strcmp(orden, "info") == 1)
+        else if (strcmp(orden, "info\0") == 0)
         {
             LeeSuperBloque(&ext_superblock);
             //continue;
         }
-        else if (strcmp(orden, "bytemaps") == 1)
+        else if (strcmp(orden, "bytemaps\0") == 0)
         {
             Printbytemaps(&ext_bytemaps);
             continue;
         }
-        else if (strcmp(orden, "imprimir") == 1)
+        else if (strcmp(orden, "imprimir\0") == 0)
         {
             if (!Imprimir(directorio, &ext_blq_inodos, memdatos, argumento1)) {
                     printf("Error al imprimir el fichero\n");
                 }
             continue;
         }
-        else if (strcmp(orden, "rename") == 1)
+        else if (strcmp(orden, "rename\0") == 0)
         {
             if (!Renombrar(directorio, &ext_blq_inodos, argumento1, argumento2)) {
                     printf("Error al renombrar el fichero\n");
                 }
             continue;
         }
-        else if (strcmp(orden, "remove") == 1)
+        else if (strcmp(orden, "remove\0") == 0)
         {
             if (!Borrar(directorio, &ext_blq_inodos, &ext_bytemaps, &ext_superblock, argumento1, fent)) {
                     printf("Error al eliminar el fichero\n");
                 }
             continue;
         }
-        else if (strcmp(orden, "copy") == 1)
+        else if (strcmp(orden, "copy\0") == 0)
         {
             if (!Copiar(directorio, &ext_blq_inodos, &ext_bytemaps, &ext_superblock, memdatos, argumento1, argumento2, fent)) {
                     printf("Error al copiar el fichero\n");
@@ -121,15 +121,13 @@ int main()
         grabardatos = 0;*/
         // Si el comando es salir se habrán escrito todos los metadatos
         // faltan los datos y cerrar
-        else if (strcmp(orden, "salir") == 1)
+        else if (strcmp(orden, "salir") == 0)
         {
             GrabarDatos(memdatos, fent);
             fclose(fent);
             return 0;
         }
-        else{
-            printf("ERROR: Comando ilegal [bytemaps, copy, dir, info, imprimir, rename, remove, salir]");
-        }
+        
     }
 }
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps)
@@ -137,33 +135,26 @@ void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps)
 }
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
 {
-    const char *comandosPosibles[] = {"info\0", "bytemaps\0", "dir\0", "rename\0","imprimir\0", "remove\0", "copy\0"};
-    char letra;
+    const char *comandosPosibles[] = {"info", "bytemaps", "dir", "rename","imprimir", "remove", "copy", "salir"};
     int i = 0;
     int valorRetorno = 1;
-    while(((letra = strcomando[i++]) != ' ') && (letra != '\0')){
-        orden[i-1] = letra;
-		printf("%c", orden[i-1]);
+    while (strcomando[i] != ' ' && strcomando[i] != '\0') {
+        orden[i] = strcomando[i];
+        i++;
     }
-    orden[i-1] = '\0';
+    orden[i-1] = '\0'; 
 	
-    i = 0;
-    for(int j = 0; j < 7 && valorRetorno == 1; j++){
+    for (int j = 0; j < 8 && valorRetorno == 1; j++) {
 		
-		
-        while(comandosPosibles[j][i] == orden[i] && comandosPosibles[j][i] != '\0' && orden[i] != '\0')
-		{
-			printf("%c - %c\n", comandosPosibles[j][i], orden[i]);
-			i++;
-		}
-        if(orden[i+1] == '\0'){
+        if (strcmp(comandosPosibles[j], orden) == 0) {
             valorRetorno = 0;
         }
-		i=0;
     }
-	if(valorRetorno == 1){
-		printf("ERROR: Comando ilegal [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n");
-	}
+
+    if (valorRetorno == 1) {
+        printf("ERROR: Comando ilegal [bytemaps, copy, dir, info, imprimir, rename, remove, salir]\n");
+    }
+	
     return valorRetorno;
 }
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup)

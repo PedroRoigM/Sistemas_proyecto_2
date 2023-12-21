@@ -41,7 +41,7 @@ int main()
     int entradadir;
     int grabardatos;
     FILE *fent;
-
+	
     // Lectura del fichero completo de una sola vez
     //...
 
@@ -79,6 +79,7 @@ int main()
         }
         else if (strcmp(orden, "bytemaps\0") == 0)
         {
+			printf("Bytemaps:\n");
             Printbytemaps(&ext_bytemaps);
             continue;
         }
@@ -132,6 +133,15 @@ int main()
 }
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps)
 {
+	printf("Inodos: ");
+	for(int i = 0; i < MAX_INODOS; i++){
+		printf("%d ", ext_bytemaps->bmap_inodos[i]);
+	}
+	printf("\nBloques [0 - 25]: ");
+	for(int i = 0; i < 25; i++){
+		printf("%d ", ext_bytemaps->bmap_bloques[i]);
+	}
+	printf("\n");
 }
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2)
 {
@@ -173,6 +183,33 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 }
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
 {
+	for (int i = 0; i < MAX_INODOS; i++) {
+		if (directorio[i].dir_nfich[0] != '\0') {
+		  // Ignorar la entrada especial del directorio raíz
+		  if (strcmp(directorio[i].dir_nfich, ".") != 0 && strcmp(directorio[i].dir_nfich, "..") != 0) {
+			// Verificar existencia del archivo
+			if (inodos->blq_inodos[directorio[i].dir_inodo].size_fichero > 0) {
+			  // Imprimir información del fichero
+			  printf("Nombre: %s\n", directorio[i].dir_nfich);
+			  printf("Tamaño: %u\n", inodos->blq_inodos[directorio[i].dir_inodo].size_fichero);
+			  printf("Inodo: %u\n", directorio[i].dir_inodo);
+
+			  // Imprimir bloques que ocupa
+			  printf("Bloques:");
+			  for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++) {
+				if (inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != 0) {
+				  printf(" %u", inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+				}
+			  }
+			  printf("\n");
+
+			  printf("---------------\n");
+			} else {
+			  printf("El archivo %s no existe.\n", directorio[i].dir_nfich);
+			}
+		  }
+		}
+	  }
 }
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
 {
@@ -185,10 +222,10 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
            char *nombre, FILE *fich)
 {
 }
-int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
-           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
-           EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino, FILE *fich)
+int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino, FILE *fich)
 {
+	
+		
 }
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich)
 {

@@ -41,7 +41,7 @@ int main()
     int entradadir;
     int grabardatos;
     FILE *fent;
-
+    
     // Lectura del fichero completo de una sola vez
     //...
 
@@ -205,15 +205,15 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup)
 {
     printf("Bloques de %u Bytes \n", psup->s_block_size);
-    printf("Inodos partición = %u\n", psup->s_inodes_count);
+    printf("Inodos particion = %u\n", psup->s_inodes_count);
     printf("Inodos libres = %u\n", psup->s_free_inodes_count);
-    printf("Bloques partición = %u\n", psup->s_blocks_count);
+    printf("Bloques particion = %u\n", psup->s_blocks_count);
     printf("Bloques libres = %u\n", psup->s_free_blocks_count);
     printf("Primer bloque de datos = %u\n", psup->s_first_data_block);
 }
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 {
-}
+}/*
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
 {
     for (int i = 0; i < MAX_INODOS; i++)
@@ -251,6 +251,22 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos)
             }
         }
     }
+}*/
+void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos) {
+    for (int i = 0; i < MAX_INODOS; i++) {
+        if (directorio[i].dir_inodo != 0xFFFF) { 
+            printf("%s\ttamano:%d\tinodo:%d\tbloques: ", 
+                   directorio[i].dir_nfich,
+                   inodos->blq_inodos[directorio[i].dir_inodo].size_fichero,
+                   directorio[i].dir_inodo);
+            for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++) {
+                if (inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j] != 0xFFFF) {
+                    printf("%d ", inodos->blq_inodos[directorio[i].dir_inodo].i_nbloque[j]);
+                }
+            }
+            printf("\n");
+        }
+    }
 }
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
 {
@@ -260,12 +276,9 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
     printf("Nombre %s\n", nombre);
     return 0;
 }
-
- 
-
-int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich) 
+int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich)
 {
-  int i;
+    int i;
   int encontrado = 0;
 	int contador = 0;
   // Buscar el archivo en el directorio

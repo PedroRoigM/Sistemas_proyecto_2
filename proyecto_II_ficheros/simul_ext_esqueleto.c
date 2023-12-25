@@ -203,13 +203,12 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 }
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup)
 {
-    printf("Información del Superbloque:\n");
-    printf("Total de inodos: %u\n", psup->s_inodes_count);
-    printf("Total de bloques: %u\n", psup->s_blocks_count);
-    printf("Bloques libres: %u\n", psup->s_free_blocks_count);
-    printf("Inodos libres: %u\n", psup->s_free_inodes_count);
-    printf("Primer bloque de datos: %u\n", psup->s_first_data_block);
-    printf("Tamaño del bloque: %u bytes\n", psup->s_block_size);
+    printf("Bloques de %u Bytes \n", psup->s_block_size);
+    printf("Inodos partición = %u\n", psup->s_inodes_count);
+    printf("Inodos libres = %u\n", psup->s_free_inodes_count);
+    printf("Bloques partición = %u\n", psup->s_blocks_count);
+    printf("Bloques libres = %u\n", psup->s_free_blocks_count);
+    printf("Primer bloque de datos = %u\n", psup->s_first_data_block);
 }
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 {
@@ -260,10 +259,9 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
     printf("Nombre %s\n", nombre);
     return 0;
 }
-int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
-           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
-           char *nombre, FILE *fich)
+int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombre, FILE *fich)
 {
+    
 }
 int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino, FILE *fich)
 {

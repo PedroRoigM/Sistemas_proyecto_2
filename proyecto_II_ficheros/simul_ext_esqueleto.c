@@ -235,8 +235,40 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 }
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
-    printf("Nombre %s\n", nombre);
-    return 0;
+	int encontrado = 0;
+    int inodo_actual;
+	int a;
+
+    // Buscar el archivo en el directorio
+    for (int i = 0; i < MAX_INODOS; i++) {
+        if (strcmp(directorio[i].dir_nfich, nombre) == 0) {
+            encontrado = 1; 
+			a = i;
+            inodo_actual = directorio[i].dir_inodo;
+            break;
+        }
+    }
+	
+    if (!encontrado) {
+        printf("El archivo %s no existe.\n", nombre);
+        return 0;
+    }
+
+    // Imprimir el contenido del archivo
+    while (inodo_actual != NULL_INODO) {
+		
+        for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
+			
+            if (inodos->blq_inodos[inodo_actual].i_nbloque[i] != NULL_BLOQUE) {
+				
+                printf("%s\n", memdatos[inodos->blq_inodos[inodo_actual].i_nbloque[i] - 4].dato);
+            }
+        }
+
+        inodo_actual = inodos->blq_inodos[inodo_actual].i_nbloque[MAX_NUMS_BLOQUE_INODO - 1];
+    }
+
+    return 1;
 }
 void LiberarBloque(unsigned int num_bloque, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock) {
     ext_bytemaps->bmap_bloques[num_bloque] = 0;

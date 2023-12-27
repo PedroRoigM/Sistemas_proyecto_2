@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "cabeceras.h"
 
 #define LONGITUD_COMANDO 100
@@ -236,14 +237,15 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
 	int encontrado = 0;
-    int inodo_actual;
-	int a;
+    int inodo_actual, inodo_actual_replica;
+	int *numerosBloques = (int*)malloc(0);
+	int numeroBloquesEncontrados = 0;
 
     // Buscar el archivo en el directorio
     for (int i = 0; i < MAX_INODOS; i++) {
         if (strcmp(directorio[i].dir_nfich, nombre) == 0) {
             encontrado = 1; 
-			a = i;
+			
             inodo_actual = directorio[i].dir_inodo;
             break;
         }
@@ -253,15 +255,42 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
         printf("El archivo %s no existe.\n", nombre);
         return 0;
     }
+	inodo_actual_replica = inodo_actual;
+	while (inodo_actual_replica != NULL_INODO) {
+		
+        for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
+			
+            if (inodos->blq_inodos[inodo_actual_replica].i_nbloque[i] != NULL_BLOQUE) {
+				
+				numeroBloquesEncontrados++;
+                numerosBloques = (int*)realloc(numerosBloques, sizeof(int) * numeroBloquesEncontrados);
+				numerosBloques[numeroBloquesEncontrados - 1] = inodos->blq_inodos[inodo_actual_replica].i_nbloque[i] - 4;
+				
+            }
+        }
 
+        inodo_actual_replica = inodos->blq_inodos[inodo_actual_replica].i_nbloque[MAX_NUMS_BLOQUE_INODO - 1];
+    }
+	// 2 5 4
+	int nBloqueCopia[numeroBloquesEncontrados];
+	int posicion = 0;
+	for(int i = 0; i < numeroBloquesEncontrados; i++){
+		for(int j = 0; j < numeroBloquesEncontrados; j++){
+			
+			if(numerosBloques[i] > numerosBloques[j]){
+				posicion++;
+			}
+		}
+		nBloqueCopia[posicion] = numerosBloques[i];
+		posicion = 0;
+	}
     // Imprimir el contenido del archivo
     while (inodo_actual != NULL_INODO) {
 		
         for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
 			
             if (inodos->blq_inodos[inodo_actual].i_nbloque[i] != NULL_BLOQUE) {
-				
-                printf("%s\n", memdatos[inodos->blq_inodos[inodo_actual].i_nbloque[i] - 4].dato);
+                printf("%s\n", memdatos[numerosBloques[i]].dato);
             }
         }
 

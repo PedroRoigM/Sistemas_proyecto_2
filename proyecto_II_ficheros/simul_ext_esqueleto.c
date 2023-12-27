@@ -237,7 +237,7 @@ int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombrea
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
 	int encontrado = 0;
-    int inodo_actual, inodo_actual_replica;
+    int inodo_actual;
 	int *numerosBloques = (int*)malloc(0);
 	int numeroBloquesEncontrados = 0;
 
@@ -255,21 +255,21 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
         printf("El archivo %s no existe.\n", nombre);
         return 0;
     }
-	inodo_actual_replica = inodo_actual;
-	while (inodo_actual_replica != NULL_INODO) {
+	
+	while (inodo_actual != NULL_INODO) {
 		
         for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
 			
-            if (inodos->blq_inodos[inodo_actual_replica].i_nbloque[i] != NULL_BLOQUE) {
+            if (inodos->blq_inodos[inodo_actual].i_nbloque[i] != NULL_BLOQUE) {
 				
 				numeroBloquesEncontrados++;
                 numerosBloques = (int*)realloc(numerosBloques, sizeof(int) * numeroBloquesEncontrados);
-				numerosBloques[numeroBloquesEncontrados - 1] = inodos->blq_inodos[inodo_actual_replica].i_nbloque[i] - 4;
+				numerosBloques[numeroBloquesEncontrados - 1] = inodos->blq_inodos[inodo_actual].i_nbloque[i] - 4;
 				
             }
         }
 
-        inodo_actual_replica = inodos->blq_inodos[inodo_actual_replica].i_nbloque[MAX_NUMS_BLOQUE_INODO - 1];
+        inodo_actual = inodos->blq_inodos[inodo_actual].i_nbloque[MAX_NUMS_BLOQUE_INODO - 1];
     }
 	// 2 5 4
 	int nBloqueCopia[numeroBloquesEncontrados];
@@ -285,18 +285,9 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 		posicion = 0;
 	}
     // Imprimir el contenido del archivo
-    while (inodo_actual != NULL_INODO) {
-		
-        for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
-			
-            if (inodos->blq_inodos[inodo_actual].i_nbloque[i] != NULL_BLOQUE) {
-                printf("%s\n", memdatos[numerosBloques[i]].dato);
-            }
-        }
-
-        inodo_actual = inodos->blq_inodos[inodo_actual].i_nbloque[MAX_NUMS_BLOQUE_INODO - 1];
-    }
-
+    for(int i = 0; i < numeroBloquesEncontrados; i++)
+        printf("%s", memdatos[nBloqueCopia[i]].dato);
+	printf("\n");
     return 1;
 }
 void LiberarBloque(unsigned int num_bloque, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock) {

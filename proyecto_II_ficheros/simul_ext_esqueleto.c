@@ -180,7 +180,7 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
                 i++;
                 contadorArgumanto++;
             }
-            argumento2[contadorArgumanto] = '\0';
+            argumento2[contadorArgumanto - 1] = '\0';
         }else
 			argumento1[contadorArgumanto - 1] = '\0';
     }
@@ -217,7 +217,7 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 }
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos) {
     for (int i = 0; i < MAX_INODOS; i++) {
-        if (directorio[i].dir_inodo != 0xFFFF && inodos->blq_inodos[directorio[i].dir_inodo].size_fichero > 0 && directorio[i].dir_inodo > 0 && directorio[i].dir_inodo > 0) { 
+        if (directorio[i].dir_inodo != 0xFFFF && inodos->blq_inodos[directorio[i].dir_inodo].size_fichero > 0 && directorio[i].dir_inodo > 0) { 
             printf("%s\ttamano:%d\tinodo:%d\tbloques: ", 
                    directorio[i].dir_nfich,
                    inodos->blq_inodos[directorio[i].dir_inodo].size_fichero,
@@ -233,6 +233,18 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos) {
 }
 int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombreantiguo, char *nombrenuevo)
 {
+	int encontrado = 0;
+	int i;
+	for(i = 0; i < MAX_INODOS; i++)
+		if (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0){
+			encontrado = 1;
+			break;
+		}
+	if(!encontrado){
+		return 0;
+	}
+	memcpy(directorio[i].dir_nfich, nombrenuevo, LEN_NFICH);
+	return 1;
 }
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *memdatos, char *nombre)
 {
@@ -271,22 +283,30 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
 
         inodo_actual = inodos->blq_inodos[inodo_actual].i_nbloque[MAX_NUMS_BLOQUE_INODO - 1];
     }
-	// 2 5 4
+	
+	
 	int nBloqueCopia[numeroBloquesEncontrados];
+	
 	int posicion = 0;
 	for(int i = 0; i < numeroBloquesEncontrados; i++){
 		for(int j = 0; j < numeroBloquesEncontrados; j++){
 			
 			if(numerosBloques[i] > numerosBloques[j]){
+				
 				posicion++;
 			}
 		}
 		nBloqueCopia[posicion] = numerosBloques[i];
+		
 		posicion = 0;
 	}
     // Imprimir el contenido del archivo
+	
     for(int i = 0; i < numeroBloquesEncontrados; i++)
+	{
         printf("%s", memdatos[nBloqueCopia[i]].dato);
+	}
+	
 	printf("\n");
     return 1;
 }
@@ -321,6 +341,59 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 
 int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino, FILE *fich)
 {
+	int i, encontrado = 0;
+	int numDirectorioOriginal, numDirectorio = 0;
+	for(i = 0; i < MAX_INODOS; i++)
+		if (strcmp(directorio[i].dir_nfich, nombreorigen) == 0){
+			encontrado = 1;
+			numDirectorioOriginal = i;
+			break;
+		}
+	if(!encontrado){
+		return 0;
+	}
+	for(int i = 1; i < MAX_INODOS; i++)
+		if (directorio[i].dir_inodo == 0xFFFF)
+		{
+			numDirectorio = i;
+			break;
+		}
+	memcpy(directorio[numDirectorio].dir_nfich, nombredestino, LEN_NFICH);
+	
+	
+	encontrado = 0;
+	for(int i = 0; i < MAX_INODOS; i++){
+		if(ext_bytemaps->bmap_inodos[i] == 0){
+			encontrado = 1;
+			ext_bytemaps->bmap_inodos[i] = 1;
+			directorio[numDirectorio].dir_inodo = i;
+			break;
+		}
+	}
+	if(!encontrado){
+		return 0;
+	}
+	int bloquesEncontrados = 0;
+	
+    for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
+        if (inodos->blq_inodos[directorio[numDirectorioOriginal].dir_inodo].i_nbloque[i] != NULL_BLOQUE) {
+				
+			for(int j = 0; j < MAX_BLOQUES_DATOS; j++){
+				if(ext_bytemaps->bmap_bloques[j] == 0){
+					ext_bytemaps->bmap_bloques[j] = 1;
+					
+					inodos->blq_inodos[directorio[numDirectorio].dir_inodo].i_nbloque[bloquesEncontrados] = j;
+					
+					memdatos[j - 4] = memdatos[inodos->blq_inodos[directorio[numDirectorioOriginal].dir_inodo].i_nbloque[i] - 4];
+					
+					bloquesEncontrados++;
+					break;
+				}
+			}
+        }
+    }
+	inodos->blq_inodos[directorio[numDirectorio].dir_inodo].size_fichero = inodos->blq_inodos[directorio[numDirectorioOriginal].dir_inodo].size_fichero;
+	
 }
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich)
 {

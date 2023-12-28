@@ -95,6 +95,8 @@ int main()
             if (!Renombrar(directorio, &ext_blq_inodos, argumento1, argumento2))
             {
                 printf("Error al renombrar el fichero\n");
+            } else{
+                Grabarinodosydirectorio(directorio, &ext_blq_inodos, fich);
             }
             continue;
         }
@@ -332,6 +334,9 @@ int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 
             memset(&directorio[i], 0, sizeof(EXT_ENTRADA_DIR));
             directorio[i].dir_inodo = 0xFFFF;
+            GrabarSuperBloque(ext_superblock, fich);
+            GrabarByteMaps(ext_bytemaps, fich);
+            Grabarinodosydirectorio(directorio, inodos, fich);
             return 1; 
         }
     }
@@ -393,7 +398,10 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
         }
     }
 	inodos->blq_inodos[directorio[numDirectorio].dir_inodo].size_fichero = inodos->blq_inodos[directorio[numDirectorioOriginal].dir_inodo].size_fichero;
-	
+	GrabarSuperBloque(ext_superblock, fich);
+    GrabarByteMaps(ext_bytemaps, fich);
+    Grabarinodosydirectorio(directorio, inodos, fich);
+    GrabarDatos(memdatos, fich);
 }
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich)
 {

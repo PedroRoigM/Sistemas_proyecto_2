@@ -212,6 +212,7 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 }
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup)
 {
+    //imprime en pantalla los bloques
     printf("Bloques de %u Bytes \n", psup->s_block_size);
     printf("Inodos particion = %u\n", psup->s_inodes_count);
     printf("Inodos libres = %u\n", psup->s_free_inodes_count);
@@ -229,6 +230,7 @@ int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, char *nombre)
 	return -1;
 }
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos) {
+    //recorre el directorio y muestra los archivos que tengan un size mayor que 0 y cuyo inodo sea distinto a 0xFFFF
     for (int i = 0; i < MAX_INODOS; i++) {
         if (directorio[i].dir_inodo != 0xFFFF && inodos->blq_inodos[directorio[i].dir_inodo].size_fichero > 0 && directorio[i].dir_inodo > 0) { 
             printf("%s\ttamano:%d\tinodo:%d\tbloques: ", 
@@ -329,11 +331,13 @@ int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_DATOS *mem
     return 1;
 }
 void LiberarBloque(unsigned int num_bloque, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock) {
+    //libera un bloque declarando su valor a 0
     ext_bytemaps->bmap_bloques[num_bloque] = 0;
     ext_superblock->s_free_blocks_count++;
 }
 
 int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock, char *nombreCompleto, FILE *fich) {
+    //borra un fichero, para ello recorre inodos y pone el valor 0xFFFF, ademas en bytemaps declara el valor a 0. luego sobreescribe el binario.
     for (int i = 0; i < MAX_INODOS; i++) {
         if (directorio[i].dir_inodo != 0xFFFF && strcmp(directorio[i].dir_nfich, nombreCompleto) == 0) {
             unsigned int inodo_id = directorio[i].dir_inodo;
@@ -443,11 +447,6 @@ int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, EXT_BYTE_MAPS *e
 }
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich)
 {
-    /*fseek(fich, 3 * SIZE_BLOQUE, SEEK_SET);
-    fwrite(inodos, SIZE_BLOQUE, 1, fich);
-    fseek(fich, 4 * SIZE_BLOQUE, SEEK_SET);
-    fwrite(directorio, SIZE_BLOQUE, 1, fich);
-    fflush(fich);*/
     fseek(fich, 2 * SIZE_BLOQUE, SEEK_SET);
     fwrite(inodos, sizeof(EXT_BLQ_INODOS), 1, fich);
     fseek(fich, 3 * SIZE_BLOQUE, SEEK_SET);
@@ -456,18 +455,12 @@ void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos
 }
 void GrabarByteMaps(EXT_BYTE_MAPS *ext_bytemaps, FILE *fich)
 {
-    /*fseek(fich, 1 * SIZE_BLOQUE, SEEK_SET);
-    fwrite(ext_bytemaps, SIZE_BLOQUE, 1, fich);
-    fflush(fich);*/
     fseek(fich, SIZE_BLOQUE, SEEK_SET);
     fwrite(ext_bytemaps, sizeof(EXT_BYTE_MAPS), 1, fich);
     fflush(fich);
 }
 void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich)
 {
-    /*fseek(fich, 0 * SIZE_BLOQUE, SEEK_SET);
-    fwrite(ext_superblock, SIZE_BLOQUE, 1, fich);
-    fflush(fich);*/
     fseek(fich, 0, SEEK_SET);
     fwrite(ext_superblock, sizeof(EXT_SIMPLE_SUPERBLOCK), 1, fich);
     fflush(fich);
